@@ -52,10 +52,12 @@ class AlphaZero:
             depth=0
         )
 
+        # On traite le premier noeud qui est un cas particulier
         transitions['hiddens'].append(root_node.parent.hidden_state)
         transitions['cells'].append(root_node.parent.cell_state)
         # compute action choice
         tree_policy, action, tree_value, new_root_node = mcts.compute_action(root_node)
+        # On ne pouvait pas prendre son hidden state avant de compute l'action car il était nul
         saved_hidden = root_node.hidden_state
         saved_cell = root_node.cell_state
         root_node = new_root_node
@@ -72,8 +74,10 @@ class AlphaZero:
         transitions['rewards'].append(reward)
 
         while not done:
-            transitions['hiddens'].append(root_node.parent.hidden_state)
-            transitions['cells'].append(root_node.parent.cell_state)
+            # On sauve h-1
+            transitions['hiddens'].append(saved_hidden)     # remplacer save_hidde par root_node.parent.cell_state pour que h == vecteur nul
+            transitions['cells'].append(saved_hidden)       # /      /      /      /       /
+            # On sauve ce qui deviendra h-1 pour le prochain noeud
             saved_hidden = root_node.hidden_state
             saved_cell = root_node.cell_state
             # compute action choice
@@ -89,7 +93,6 @@ class AlphaZero:
             # obtain reward for the chosen action and store it
             obs, reward, done, info = self.env.step(action)
             transitions['rewards'].append(reward)
-        #print(transitions['hiddens'], len(transitions['hiddens']))
         return transitions
 
     def postprocess_transitions(self, transitions):

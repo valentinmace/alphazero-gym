@@ -16,7 +16,7 @@ class AlphaZeroModel(nn.Module):
         nn.Module.__init__(self)
 
         num_hidden = model_config['num_hidden']
-        # Dense and simple neural network as base for both heads
+        # LSTM neural network as base for both heads
         self.decision_function_shared = nn.LSTMCell(input_size=self.obs_dim, hidden_size=num_hidden)
         self.policy_head = nn.Linear(num_hidden, self.num_actions)
         self.value_head = nn.Linear(num_hidden, self.value_support_size)

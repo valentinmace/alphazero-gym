@@ -18,6 +18,7 @@ class AlphaZeroMCTS(MCTS):
         return priors
 
     def compute_priors_and_value(self, node, hidden_state, cell_state):
+        # Les priors et values sont calculées en tenant compte de h-1
         obs = np.expand_dims(node.obs, axis=0)  # add batch size of 1
         priors, value, h, c = self.model.compute_priors_and_value(obs, hidden_state, cell_state)
         if self.config['add_dirichlet_noise']:
@@ -31,7 +32,9 @@ class AlphaZeroMCTS(MCTS):
             if leaf.done:
                 value = leaf.reward
             else:
+                # On passe h-1 (parent.hidden_state) pour conditionner le LSTM quand il doit output h
                 child_priors, value, h, c = self.compute_priors_and_value(leaf, leaf.parent.hidden_state, leaf.parent.cell_state)
+                # On sauve le h du noeud actuel qui sera donné comme h-1 à ses futurs fils
                 leaf.hidden_state = h
                 leaf.cell_state = c
                 leaf.expand(child_priors)
